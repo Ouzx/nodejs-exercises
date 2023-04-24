@@ -9,10 +9,11 @@ const pgp = pgPromise()("postgres://admin:admin@localhost:5432/planets");
 const setupDb = async () => {
   await pgp.none(
     `
-    CREATE TABLE IF NOT EXISTS planets (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL
-    );`
+        CREATE TABLE IF NOT EXISTS planets (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            imgPath TEXT
+        );`
   );
 };
 
@@ -88,4 +89,20 @@ const deleteById = async (req: Request, res: Response) => {
   }
 };
 
-export { getAll, getOneById, create, updateById, deleteById };
+const createImage = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const planet = await pgp.oneOrNone("SELECT * FROM planets WHERE id = $1", [
+    id,
+  ]);
+
+  if (planet && req.file) {
+    const updatedPlanet = await pgp.oneOrNone(
+      "UPDATE planets SET imgPath = $1 WHERE id = $2 RETURNING *",
+      [req.file.path, id]
+    );
+    res.status(200).json(updatedPlanet);
+  }
+};
+
+export { getAll, getOneById, create, updateById, deleteById, createImage };

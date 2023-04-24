@@ -7,7 +7,10 @@ import {
   create,
   updateById,
   deleteById,
+  createImage,
 } from "./controllers/planets.js";
+
+import multer = require("multer");
 
 dotenv.config();
 
@@ -15,6 +18,19 @@ const app = express();
 app.use(express.json());
 
 app.use(morgan("dev"));
+app.use("/uploads", express.static("uploads"));
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads");
+  },
+  filename: function (req, file, cb) {
+    const fileName = file.originalname.split(".");
+    cb(null, `${fileName[0]}-${Date.now()}.${fileName[1]}`);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -29,6 +45,8 @@ app.post("/api/planets", create);
 app.put("/api/planets/:id", updateById);
 
 app.delete("/api/planets/:id", deleteById);
+
+app.post("/api/planets/:id/image", upload.single("image"), createImage);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(

@@ -12,17 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteById = exports.updateById = exports.create = exports.getOneById = exports.getAll = void 0;
+exports.createImage = exports.deleteById = exports.updateById = exports.create = exports.getOneById = exports.getAll = void 0;
 // import joi
 const joi_1 = __importDefault(require("joi"));
 const pg_promise_1 = __importDefault(require("pg-promise"));
 const pgp = (0, pg_promise_1.default)()("postgres://admin:admin@localhost:5432/planets");
 const setupDb = () => __awaiter(void 0, void 0, void 0, function* () {
     yield pgp.none(`
-    CREATE TABLE IF NOT EXISTS planets (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL
-    );`);
+        CREATE TABLE IF NOT EXISTS planets (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            imgPath TEXT
+        );`);
 });
 setupDb();
 const planetsSchema = joi_1.default.object({
@@ -87,3 +88,14 @@ const deleteById = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteById = deleteById;
+const createImage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const planet = yield pgp.oneOrNone("SELECT * FROM planets WHERE id = $1", [
+        id,
+    ]);
+    if (planet && req.file) {
+        const updatedPlanet = yield pgp.oneOrNone("UPDATE planets SET imgPath = $1 WHERE id = $2 RETURNING *", [req.file.path, id]);
+        res.status(200).json(updatedPlanet);
+    }
+});
+exports.createImage = createImage;
