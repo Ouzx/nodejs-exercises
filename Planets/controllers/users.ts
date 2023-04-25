@@ -32,4 +32,23 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
-export { login };
+const signup = async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  const user = await pgp.oneOrNone("SELECT * FROM users WHERE username = $1", [
+    username,
+  ]);
+
+  if (user) {
+    return res.status(409).json({ message: "Username already exists" });
+  }
+
+  await pgp.none("INSERT INTO users (username, password) VALUES ($1, $2)", [
+    username,
+    password,
+  ]);
+
+  return res.status(201).json({ message: "User created" });
+};
+
+export { login, signup };

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = void 0;
+exports.signup = exports.login = void 0;
 const db_1 = __importDefault(require("../db"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -41,3 +41,18 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
+const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { username, password } = req.body;
+    const user = yield db_1.default.oneOrNone("SELECT * FROM users WHERE username = $1", [
+        username,
+    ]);
+    if (user) {
+        return res.status(409).json({ message: "Username already exists" });
+    }
+    yield db_1.default.none("INSERT INTO users (username, password) VALUES ($1, $2)", [
+        username,
+        password,
+    ]);
+    return res.status(201).json({ message: "User created" });
+});
+exports.signup = signup;

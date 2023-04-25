@@ -34,6 +34,7 @@ app.put("/api/planets/:id", planets_js_1.updateById);
 app.delete("/api/planets/:id", planets_js_1.deleteById);
 app.post("/api/planets/:id/image", upload.single("image"), planets_js_1.createImage);
 app.post("/api/users/login", users_js_1.login);
+app.post("/api/users/signup", users_js_1.signup);
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server listening on port ${process.env.PORT}. Link: http://localhost:${process.env.PORT}`);
 });
