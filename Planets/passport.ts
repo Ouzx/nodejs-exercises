@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import passport from "passport";
 import passportJWT from "passport-jwt";
-import pgp from "./db";
+import pgp from "./db.js";
 
 dotenv.config();
 
@@ -15,8 +15,6 @@ passport.use(
       const user = pgp.oneOrNone("SELECT * FROM users WHERE id = $1", [
         jwtPayload.id,
       ]);
-
-      console.log(user);
 
       try {
         return user ? done(null, user) : done(new Error("User not found"));

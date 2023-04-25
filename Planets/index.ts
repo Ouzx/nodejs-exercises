@@ -10,7 +10,9 @@ import {
   createImage,
 } from "./controllers/planets.js";
 
-import { login, signup } from "./controllers/users.js";
+import { login, logout, signup } from "./controllers/users.js";
+import { authorize } from "./authorize.js";
+import "./passport.js";
 
 import multer = require("multer");
 
@@ -48,10 +50,16 @@ app.put("/api/planets/:id", updateById);
 
 app.delete("/api/planets/:id", deleteById);
 
-app.post("/api/planets/:id/image", upload.single("image"), createImage);
+app.post(
+  "/api/planets/:id/image",
+  authorize,
+  upload.single("image"),
+  createImage
+);
 
 app.post("/api/users/login", login);
 app.post("/api/users/signup", signup);
+app.post("/api/users/logout", authorize, logout);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(

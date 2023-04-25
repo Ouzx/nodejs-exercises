@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import pgp from "../db";
+import pgp from "../db.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
@@ -51,4 +51,11 @@ const signup = async (req: Request, res: Response) => {
   return res.status(201).json({ message: "User created" });
 };
 
-export { login, signup };
+const logout = async (req: Request, res: Response) => {
+  const user: any = req.user;
+  await pgp.none("UPDATE users SET token = $1 WHERE id = $2", [null, user.id]);
+
+  return res.status(200).json({ message: "User logged out" });
+};
+
+export { login, signup, logout };
