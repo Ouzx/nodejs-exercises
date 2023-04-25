@@ -10,6 +10,8 @@ import {
   createImage,
 } from "./controllers/planets.js";
 
+import { login } from "./controllers/users.js";
+
 import multer = require("multer");
 
 dotenv.config();
@@ -47,6 +49,8 @@ app.put("/api/planets/:id", updateById);
 app.delete("/api/planets/:id", deleteById);
 
 app.post("/api/planets/:id/image", upload.single("image"), createImage);
+
+app.post("/api/users/login", login);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(
