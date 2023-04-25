@@ -15,28 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createImage = exports.deleteById = exports.updateById = exports.create = exports.getOneById = exports.getAll = void 0;
 // import joi
 const joi_1 = __importDefault(require("joi"));
-const pg_promise_1 = __importDefault(require("pg-promise"));
-const pgp = (0, pg_promise_1.default)()("postgres://admin:admin@localhost:5432/planets");
-const setupDb = () => __awaiter(void 0, void 0, void 0, function* () {
-    yield pgp.none(`
-        CREATE TABLE IF NOT EXISTS planets (
-            id SERIAL PRIMARY KEY,
-            name TEXT NOT NULL,
-            imgPath TEXT
-        );`);
-});
-setupDb();
+const db_1 = __importDefault(require("../db"));
 const planetsSchema = joi_1.default.object({
     name: joi_1.default.string().required(),
 });
 const getAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const planets = yield pgp.manyOrNone("SELECT * FROM planets");
+    const planets = yield db_1.default.manyOrNone("SELECT * FROM planets");
     res.status(200).json(planets);
 });
 exports.getAll = getAll;
 const getOneById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const planet = yield pgp.oneOrNone("SELECT * FROM planets WHERE id = $1", [
+    const planet = yield db_1.default.oneOrNone("SELECT * FROM planets WHERE id = $1", [
         id,
     ]);
     if (planet) {
@@ -54,7 +44,7 @@ const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(400).json({ msg: error.details[0].message });
     }
     else {
-        const newPlanet = yield pgp.one("INSERT INTO planets (name) VALUES ($1) RETURNING *", [planet.name]);
+        const newPlanet = yield db_1.default.one("INSERT INTO planets (name) VALUES ($1) RETURNING *", [planet.name]);
         res.status(201).json(newPlanet);
     }
 });
@@ -67,7 +57,7 @@ const updateById = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(400).json({ msg: error.details[0].message });
     }
     else {
-        const updatedPlanet = yield pgp.oneOrNone("UPDATE planets SET name = $1 WHERE id = $2 RETURNING *", [planet.name, id]);
+        const updatedPlanet = yield db_1.default.oneOrNone("UPDATE planets SET name = $1 WHERE id = $2 RETURNING *", [planet.name, id]);
         if (updatedPlanet) {
             res.status(200).json(updatedPlanet);
         }
@@ -79,7 +69,7 @@ const updateById = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.updateById = updateById;
 const deleteById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const deletedPlanet = yield pgp.oneOrNone("DELETE FROM planets WHERE id = $1 RETURNING *", [id]);
+    const deletedPlanet = yield db_1.default.oneOrNone("DELETE FROM planets WHERE id = $1 RETURNING *", [id]);
     if (deletedPlanet) {
         res.status(200).json(deletedPlanet);
     }
@@ -90,11 +80,11 @@ const deleteById = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.deleteById = deleteById;
 const createImage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const planet = yield pgp.oneOrNone("SELECT * FROM planets WHERE id = $1", [
+    const planet = yield db_1.default.oneOrNone("SELECT * FROM planets WHERE id = $1", [
         id,
     ]);
     if (planet && req.file) {
-        const updatedPlanet = yield pgp.oneOrNone("UPDATE planets SET imgPath = $1 WHERE id = $2 RETURNING *", [req.file.path, id]);
+        const updatedPlanet = yield db_1.default.oneOrNone("UPDATE planets SET imgPath = $1 WHERE id = $2 RETURNING *", [req.file.path, id]);
         res.status(200).json(updatedPlanet);
     }
 });

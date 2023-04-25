@@ -2,22 +2,7 @@ import { Request, Response } from "express";
 // import joi
 import Joi from "joi";
 
-import pgPromise from "pg-promise";
-
-const pgp = pgPromise()("postgres://admin:admin@localhost:5432/planets");
-
-const setupDb = async () => {
-  await pgp.none(
-    `
-        CREATE TABLE IF NOT EXISTS planets (
-            id SERIAL PRIMARY KEY,
-            name TEXT NOT NULL,
-            imgPath TEXT
-        );`
-  );
-};
-
-setupDb();
+import pgp from "../db";
 
 const planetsSchema = Joi.object({
   name: Joi.string().required(),
